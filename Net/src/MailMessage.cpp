@@ -94,31 +94,39 @@ namespace
 						cte = MailMessage::ENCODING_BASE64;
 				}
 
+				std::string contentType = header.get(MailMessage::HEADER_CONTENT_TYPE, "");
+				std::string contentDisp = header.get(MailMessage::HEADER_CONTENT_DISPOSITION, "");
+				std::string filename;
+				if (!contentDisp.empty())
+					filename = getParamFromHeader(contentDisp, "filename");
+				if (filename.empty()) 
+					filename = getParamFromHeader(contentType, "name");
+				PartSource* pPS = _pMsg->createPartStore(tmp, contentType, filename);
+				poco_check_ptr (pPS);
 				NameValueCollection::ConstIterator it = header.begin();
 				NameValueCollection::ConstIterator end = header.end();
-				PartSource* pPS = _pMsg->createPartStore(tmp, 
-					header[MailMessage::HEADER_CONTENT_TYPE], 
-					getAttrFromHeader(header[MailMessage::HEADER_CONTENT_DISPOSITION], "filename"));
-				poco_check_ptr (pPS);
 				for (; it != end; ++it)
 				{
 					if (MailMessage::HEADER_CONTENT_DISPOSITION == it->first)
 					{
-						if (it->second == "inline") _pMsg->addContent(pPS, cte);
-						else _pMsg->addAttachment(getAttrFromHeader(header[MailMessage::HEADER_CONTENT_TYPE], "name"), pPS, cte);
+						if (it->second == "inline") 
+							_pMsg->addContent(pPS, cte);
+						else 
+							_pMsg->addAttachment("", pPS, cte);
 					}
+					
 					pPS->headers().set(it->first, it->second);
 				}
 			}
 		}
 		
 	private:
-		std::string getAttrFromHeader(const std::string& str, const std::string& attrName)
+		std::string getParamFromHeader(const std::string& header, const std::string& param)
 		{
-			StringTokenizer st(str, ";=", StringTokenizer::TOK_IGNORE_EMPTY | StringTokenizer::TOK_TRIM);
+			StringTokenizer st(header, ";=", StringTokenizer::TOK_IGNORE_EMPTY | StringTokenizer::TOK_TRIM);
 			StringTokenizer::Iterator it = st.begin();
 			StringTokenizer::Iterator end = st.end();
-			for (; it != end; ++it) { if (*it == attrName) break; }
+			for (; it != end; ++it) { if (*it == param) break; }
 			if (it != end)
 			{
 				++it;

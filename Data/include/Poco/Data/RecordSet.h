@@ -192,13 +192,13 @@ public:
 
 	template <class T>
 	const T& value(std::size_t col) const;
-	/// Returns the reference to data value at [col] location.
+		/// Returns the reference to data value at [col] location.
 
 	template <class T>
-	const T& value(std::size_t col, std::size_t row, bool useFilter = true) const
+	const T& value(std::size_t col, std::size_t dataRow, bool useFilter = true) const
 		/// Returns the reference to data value at [col, row] location.
 	{
-		if (useFilter && isFiltered() && !isAllowed(row))
+		if (useFilter && isFiltered() && !isAllowed(dataRow))
 			throw InvalidAccessException("Row not allowed");
 
 		switch (storage())
@@ -206,18 +206,18 @@ public:
 			case STORAGE_VECTOR:
 			{
 				typedef typename std::vector<T> C;
-				return column<C>(col).value(row);
+				return column<C>(col).value(dataRow);
 			}
 			case STORAGE_LIST:
 			{
 				typedef typename std::list<T> C;
-				return column<C>(col).value(row);
+				return column<C>(col).value(dataRow);
 			}
 			case STORAGE_DEQUE:
 			case STORAGE_UNKNOWN:
 			{
 				typedef typename std::deque<T> C;
-				return column<C>(col).value(row);
+				return column<C>(col).value(dataRow);
 			}
 			default:
 				throw IllegalStateException("Invalid storage setting.");
@@ -225,10 +225,10 @@ public:
 	}
 
 	template <class T>
-	const T& value(const std::string& name, std::size_t row, bool useFilter = true) const
+	const T& value(const std::string& name, std::size_t dataRow, bool useFilter = true) const
 		/// Returns the reference to data value at named column, row location.
 	{
-		if (useFilter && isFiltered() && !isAllowed(row))
+		if (useFilter && isFiltered() && !isAllowed(dataRow))
 			throw InvalidAccessException("Row not allowed");
 
 		switch (storage())
@@ -236,18 +236,18 @@ public:
 			case STORAGE_VECTOR:
 			{
 				typedef typename std::vector<T> C;
-				return column<C>(name).value(row);
+				return column<C>(name).value(dataRow);
 			}
 			case STORAGE_LIST:
 			{
 				typedef typename std::list<T> C;
-				return column<C>(name).value(row);
+				return column<C>(name).value(dataRow);
 			}
 			case STORAGE_DEQUE:
 			case STORAGE_UNKNOWN:
 			{
 				typedef typename std::deque<T> C;
-				return column<C>(name).value(row);
+				return column<C>(name).value(dataRow);
 			}
 			default:
 				throw IllegalStateException("Invalid storage setting.");
@@ -409,9 +409,9 @@ private:
 
 		const AbstractExtractionVec& rExtractions = extractions();
 		AbstractExtractionVec::const_iterator it = rExtractions.begin();
-		AbstractExtractionVec::const_iterator end = rExtractions.end();
+		AbstractExtractionVec::const_iterator itEnd = rExtractions.end();
 		
-		for (; it != end; ++it)
+		for (; it != itEnd; ++it)
 		{
 			ExtractionVecPtr pExtraction = dynamic_cast<ExtractionVecPtr>(it->get());
 
@@ -514,9 +514,9 @@ inline std::size_t RecordSet::totalRowCount() const
 }
 
 
-inline void RecordSet::setTotalRowCount(std::size_t totalRowCount)
+inline void RecordSet::setTotalRowCount(std::size_t count)
 {
-	_totalRowCount = totalRowCount;
+	_totalRowCount = count;
 }
 
 

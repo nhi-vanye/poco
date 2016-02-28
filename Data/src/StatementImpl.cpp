@@ -70,9 +70,9 @@ StatementImpl::~StatementImpl()
 }
 
 
-std::size_t StatementImpl::execute(const bool& reset)
+std::size_t StatementImpl::execute(const bool& rReset)
 {
-	if (reset) resetExtraction();
+	if (rReset) resetExtraction();
 
 	if (!_rSession.isConnected())
 	{
@@ -105,7 +105,7 @@ std::size_t StatementImpl::execute(const bool& reset)
 	if (_extrLimit.value() == Limit::LIMIT_UNLIMITED)
 		_state = ST_DONE;
 
-	assignSubTotal(reset, savedDs);
+	assignSubTotal(rReset, savedDs);
 
 	if (lim < _lowerLimit)
 		throw LimitException("Did not receive enough data.");
@@ -114,7 +114,7 @@ std::size_t StatementImpl::execute(const bool& reset)
 }
 
 
-void StatementImpl::assignSubTotal(bool reset, size_t firstDs)
+void StatementImpl::assignSubTotal(bool doReset, size_t firstDs)
 {
 	if (_extractors.size() == _subTotalRowCount.size())
 	{
@@ -124,7 +124,7 @@ void StatementImpl::assignSubTotal(bool reset, size_t firstDs)
 		{
 			if (_extractors[counter].size())
 			{
-				if (reset)
+				if (doReset)
 					*it += CountVec::value_type(_extractors[counter][0]->numOfRowsHandled());
 				else
 					*it = CountVec::value_type(_extractors[counter][0]->numOfRowsHandled());
